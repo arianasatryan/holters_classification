@@ -28,6 +28,7 @@ def create_dataframe(config, target_col=True):
         ecg_info = pd.concat([pd.read_csv(directory)])
 
     ecg_info = correct_types(ecg_info, config['task_type'])
+    ecg_info = ecg_info[ecg_info['frequency'].apply(lambda x: x in config['data_config']['observed_frequencies'])]
     one_hot = make_onehot(ecg_info, config['task_type'], config['prediction_classes'])
     if 'merge_map' in config.keys():
         one_hot = merge_columns(df=one_hot, merge_map=config['merge_map'])
