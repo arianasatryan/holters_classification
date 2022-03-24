@@ -1,0 +1,31 @@
+{
+    "model_path": "/home/lab6/Desktop/new/try/prediction_tools/saved_models/new_model.hdf5",
+    "results_path": "/home/lab6/Desktop/new/try/results",
+    "experiment_name": "tested_on_holters",
+    "task_type": "scp_codes",
+    "prediction_classes": ["AFIB"],
+    "merge_map": {
+      "AFIB": ["AFIB"]
+    },
+    "training_config": {
+        "lr": 0.001,
+        "batch_size": 1000,
+        "epochs": 30
+    },
+    "SEED": 1,
+    "data_config": {
+        "source": "holters",
+        "train_test_split_ratio": null,
+	    "tis": ["/home/lab6/Desktop/new/try/current_data/collected_tis_afib1.csv"],
+	    "holters": ["/home/lab6/Desktop/new/try/current_data/map_Fibr_holters (copy).csv"],
+        "predict_record": "/home/lab6/Downloads/Telegram Desktop/data.json",
+        "leads": [0, 1],
+        "observed_frequencies": [500],
+        "resampled_frequency": 250,
+        "ecg_length": 10,
+        "overlap": 3,
+        "leads_number": 2,
+        "scale_by": "znorm",
+        "pad_mode": "constant"
+    }
+}
