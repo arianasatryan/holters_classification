@@ -1,5 +1,6 @@
 import ast
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
 from datetime import timedelta, datetime
@@ -26,8 +27,7 @@ def create_dataframe(config, target_col=True):
     for directory in data_config[data_config['source']]:
         ecg_info = pd.concat([pd.read_csv(directory)])
 
-
-    # TODO add length check
+    ecg_info = correct_types(ecg_info, config['task_type'])
     one_hot = make_onehot(ecg_info, config['task_type'], config['prediction_classes'])
     if 'merge_map' in config.keys():
         one_hot = merge_columns(df=one_hot, merge_map=config['merge_map'])
@@ -51,12 +51,19 @@ def create_dataframe_for_holters(config, target_col=True):
     for i, row in ecg_info.iterrows():
         cuts_count = row['ecg_shape'][1] // (data_config['ecg_length'] * data_config['resampled_frequency'])
         for start_sec in range(0, cuts_count):
+
+            # check if the cut is artefact
+            record = np.load(row['fpath'])["arr_0"]
             row['split_number'] = int(start_sec)
+            is_artefact = sum(np.apply_along_axis(lambda x: len(set(x)) == 1, 0, record))
+            if is_artefact:
+                continue
+
             cut_start = row['startdate'] + timedelta(seconds=int(start_sec) * data_config['ecg_length'])
             cut_end = cut_start + timedelta(seconds=data_config['ecg_length'])
             if target_col:
                 row['target'] = int(get_label(cut_start, cut_end, row['intervals'], overlap=data_config['overlap']))
-            df_cuts = df_cuts.append(row)
+            df_cuts = pd.concat([df_cuts, row])
 
     # df_cuts.to_csv(f'{data_config["source"]}current.csv')
     return df_cuts
@@ -73,7 +80,7 @@ def preprocess_holters_info(df, sec, freq, overlap, get_labels=False):
             cut_end = cut_start + timedelta(seconds=sec)
             if get_labels:
                 row['label'] = get_label(cut_start, cut_end, row['intervals'], overlap=overlap)
-            df_cuts = df_cuts.append(row)
+            df_cuts = pd.concat([df_cuts, row])
     return df_cuts
 
 
@@ -126,8 +133,3 @@ def train_val_test_split(df, test_ratio=0.2, val_ratio=0.2, SEED=1):
 
     train_df = train_df.reset_index(drop=True)
     return train_df, val_df, test_df
-
-
-
-
-

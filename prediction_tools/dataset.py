@@ -26,6 +26,7 @@ class DataGenerator(Sequence):
                  leads,
                  pad_by,
                  scale_by,
+                 device=None,
                  return_target=True):
 
         self.x = ecg_info.reset_index(drop=True)
@@ -43,6 +44,7 @@ class DataGenerator(Sequence):
         self.y = []
         self.first = True
         self.return_target = return_target
+        self.device = device
 
     def get_labels(self):
         return np.asarray(self.y)
@@ -64,7 +66,6 @@ class DataGenerator(Sequence):
         return record
 
     def _load_data(self, df_batch):
-        print("parent")
         pass
 
     def _get_record(self, fpath):
@@ -85,7 +86,6 @@ class DataGenerator(Sequence):
         return record[self.leads, ]
 
     def __getitem__(self, idx):
-        print("batch", idx)
         end = min(self.x.shape[0], (idx + 1) * self.batch_size)
         df_batch = self.x[idx * self.batch_size:end]
         X, Y = self._load_data(df_batch)
@@ -138,7 +138,6 @@ class Record:
         self.json_file = json_file
         with open(self.json_file, 'r') as fin:
             self.data_dict = json.load(fin)
-        self.leads_order = ["I", 'II', 'III', 'IV']
 
     def get_leads_names(self):
         return [lead['name'] for lead in self.data_dict['datasets']]

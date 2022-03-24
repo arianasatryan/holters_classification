@@ -44,7 +44,7 @@ def test(config):
 
     with open(os.path.join(config['results_path'], '{}_metrics_per_label.txt'.format(config['experiment_name'])),
               'w') as f:
-        f.write(report, labels=labels)
+        f.write(report)
 
     return y_pred
 
@@ -60,12 +60,12 @@ def get_metrics(y_test, y_pred, labels):
     }, classification_report(y_test, y_pred, labels=labels)
 
 
-def apply_threshold(y_pred):
+def apply_threshold(y_pred, threshold=0.5):
     y_pred_labels = []
     for pred in y_pred:
         pred_label = []
         for sample in pred:
-            label = 1 if sample >= 0.5 else 0
+            label = 1 if sample >= threshold else 0
             pred_label.append(label)
         y_pred_labels.append(pred_label)
     return np.array(y_pred_labels)
