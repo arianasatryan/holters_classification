@@ -1,10 +1,21 @@
+import os
+import sys
+import json
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.metrics import Accuracy, Recall, Precision
 from tensorflow.keras.callbacks import (ModelCheckpoint, TensorBoard, ReduceLROnPlateau, CSVLogger, EarlyStopping)
-from prediction_tools.generate_class_weights import get_class_weights
-from prediction_tools.data_utils import train_val_test_split
-from prediction_tools import data_generator, dataframe_creator
+from generate_class_weights import get_class_weights
+from data_utils import train_val_test_split, data_generator, dataframe_creator
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
 from model import get_model
+
+
+with open(sys.argv[1], "r") as f:
+    config = json.load(f)
 
 
 def train_model(config):
@@ -65,6 +76,7 @@ def train_model(config):
     callbacks += [ModelCheckpoint(f'{config["results_path"]}/backup_model_last.hdf5'),
                   ModelCheckpoint(f'{config["results_path"]}/backup_model_best.hdf5', save_best_only=True)]
     # Train neural network
+    print("START TRAINING...")
     history = model.fit(train_gen,
                         validation_data=val_gen,
                         epochs=config['training_config']["epochs"],
@@ -74,5 +86,8 @@ def train_model(config):
                         verbose=1)
     # Save final result
     model.save(f"{config['model_path']}", include_optimizer=True)
+
+
+train_model(config)
 
 

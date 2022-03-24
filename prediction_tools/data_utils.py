@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.model_selection import train_test_split
 from datetime import timedelta, datetime
+from dataset import ECGDataGenerator, HolterDataGenerator
 
 
 def correct_types(df, task_type):
@@ -134,3 +135,7 @@ def train_val_test_split(df, test_ratio=0.2, val_ratio=0.2, SEED=1):
 
     train_df = train_df.reset_index(drop=True)
     return train_df, val_df, test_df
+
+
+data_generator = dict(tis=ECGDataGenerator, holters=HolterDataGenerator)
+dataframe_creator = dict(tis=create_dataframe, holters=create_dataframe_for_holters)
