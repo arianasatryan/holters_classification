@@ -19,10 +19,14 @@ def train_model(config):
     # load data generator
     # print(config['data_config']['source'])
     ecg_info = dataframe_creator[config['data_config']['source']](config)
-    train_ecg_info, val_ecg_info, _ = train_val_test_split(ecg_info,
-                                                           test_ratio=config['data_config']['train_test_split_ratio'],
-                                                           val_ratio=config['data_config']['train_test_split_ratio'],
-                                                           SEED=config['SEED'])
+    if not isinstance(config['data_config']['train_test_split_ratio'], type(None)) \
+            and 0 < config['data_config']['train_test_split_ratio'] < 1:
+        train_ecg_info, val_ecg_info, _ = train_val_test_split(ecg_info,
+                                                               test_ratio=config['data_config']['train_test_split_ratio'],
+                                                               val_ratio=config['data_config']['train_test_split_ratio'],
+                                                               SEED=config['SEED'])
+    else:
+        train_ecg_info, val_ecg_info, _ = train_val_test_split(ecg_info, val_ratio=0.2)
     print("train_ecg_info.shape", train_ecg_info.shape, "val_ecg_info.shape", val_ecg_info.shape)
     Generator = data_generator[config['data_config']['source']]
     train_gen = Generator(ecg_info=train_ecg_info,
